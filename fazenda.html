@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Livro da Fazenda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFE8D8;
+    --paper-line:#DCD2B8;
+    --card:#FBF8F1;
+    --ink:#2E2A20;
+    --ink-soft:#6B6252;
+    --moss:#42522F;
+    --moss-dark:#2C3720;
+    --wool:#4C6478;
+    --wool-dark:#33465A;
+    --egg:#C97D1F;
+    --egg-dark:#8A5312;
+    --barn:#96382A;
+    --barn-dark:#6E271D;
+    --ok:#42522F;
+    --warn:#C97D1F;
+    --danger:#96382A;
+    --radius:10px;
+    --shadow: 0 1px 0 rgba(46,42,32,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px);
+    background-size: 100% 32px;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px;}
+  header.top{
+    padding:28px 0 18px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    border-bottom:3px double var(--ink-soft);
+    margin-bottom:0;
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand svg{flex-shrink:0;}
+  .brand h1{
+    font-family:'Roboto Slab',serif;
+    font-weight:700;
+    font-size:26px;
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--ink-soft);letter-spacing:0.4px;text-transform:uppercase;}
+  .today{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink-soft);text-align:right;}
+
+  nav.tabs{
+    display:flex;
+    gap:4px;
+    margin:22px 0 24px;
+    border-bottom:1px solid var(--paper-line);
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    font-family:'Roboto Slab',serif;
+    font-size:14.5px;
+    font-weight:500;
+    background:transparent;
+    border:1px solid transparent;
+    border-bottom:none;
+    padding:10px 16px 12px;
+    cursor:pointer;
+    color:var(--ink-soft);
+    border-radius:8px 8px 0 0;
+    position:relative;
+    top:1px;
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  nav.tabs button .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  nav.tabs button.active{
+    background:var(--card);
+    color:var(--ink);
+    border-color:var(--paper-line);
+    border-bottom:1px solid var(--card);
+  }
+  section.panel{display:none;animation:fade .25s ease;}
+  section.panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:26px;}
+  .stat{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    box-shadow:var(--shadow);
+  }
+  .stat .label{font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin:0 0 6px;}
+  .stat .value{font-family:'Roboto Slab',serif;font-size:24px;font-weight:700;margin:0;}
+  .stat.moss{border-left:4px solid var(--moss);}
+  .stat.wool{border-left:4px solid var(--wool);}
+  .stat.egg{border-left:4px solid var(--egg);}
+  .stat.barn{border-left:4px solid var(--barn);}
+
+  .board{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:20px;
+    box-shadow:var(--shadow);
+  }
+  .board h2{
+    font-family:'Roboto Slab',serif;
+    font-size:16.5px;
+    margin:0 0 4px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .board .sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;}
+
+  form.grid-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;align-items:end;margin-bottom:4px;}
+  form.grid-form label{display:flex;flex-direction:column;font-size:12px;color:var(--ink-soft);gap:5px;}
+  form.grid-form label span{font-weight:500;}
+  input,select,textarea{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:8px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:#fff;
+    color:var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--wool);outline-offset:1px;}
+  textarea{resize:vertical;min-height:38px;}
+
+  button.action{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    transition:filter .15s;
+  }
+  button.action:hover{filter:brightness(1.08);}
+  button.action:active{filter:brightness(0.95);}
+  .btn-moss{background:var(--moss);}
+  .btn-wool{background:var(--wool);}
+  .btn-egg{background:var(--egg);}
+  .btn-ghost{background:transparent;color:var(--barn);border:1px solid var(--barn);padding:6px 11px;font-size:12px;}
+  .btn-ghost:hover{background:rgba(150,56,42,0.07);}
+  .btn-ghost.small{padding:4px 9px;font-size:11.5px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px;}
+  th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;
+    color:var(--ink-soft);padding:8px 10px;border-bottom:2px solid var(--paper-line);
+  }
+  td{padding:9px 10px;border-bottom:1px solid var(--paper-line);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(66,82,47,0.035);}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+  .empty{padding:26px 10px;text-align:center;color:var(--ink-soft);font-size:13px;}
+  .empty .stamp{
+    display:inline-block;border:2px solid var(--ink-soft);border-radius:6px;
+    padding:4px 10px;font-family:'Roboto Slab',serif;font-size:12px;letter-spacing:1px;
+    text-transform:uppercase;transform:rotate(-2deg);margin-bottom:8px;opacity:0.7;
+  }
+
+  .stamp-badge{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:4px;
+    border:1.5px solid currentColor;
+    display:inline-block;
+  }
+  .st-ok{color:var(--moss);}
+  .st-warn{color:var(--egg-dark);}
+  .st-danger{color:var(--barn-dark);}
+  .st-neutral{color:var(--ink-soft);}
+
+  .row-actions{display:flex;gap:6px;}
+  .divider-label{
+    font-family:'Roboto Slab',serif;font-size:13px;font-weight:500;color:var(--ink-soft);
+    margin:20px 0 10px;padding-top:14px;border-top:1px dashed var(--paper-line);
+  }
+  .divider-label:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+
+  ::-webkit-scrollbar{height:8px;width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--paper-line);border-radius:4px;}
+
+  @media (max-width:600px){
+    .brand h1{font-size:21px;}
+    nav.tabs button{font-size:13px;padding:9px 11px 11px;}
+    .board{padding:16px 14px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="44" height="44" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="118" fill="#F1EEE4"/>
+        <circle cx="120" cy="120" r="108" fill="none" stroke="#96382A" stroke-width="6" stroke-dasharray="4 9" stroke-linecap="round"/>
+        <circle cx="120" cy="120" r="95" fill="none" stroke="#42522F" stroke-width="3"/>
+        <g transform="translate(120,78)" stroke="#4C6478" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M -22,14 C -22,-3 -11,-13 0,-13 C 11,-13 22,-3 22,14"/>
+          <circle cx="0" cy="-13" r="5" fill="#C97D1F" stroke="none"/>
+        </g>
+        <text x="120" y="163" text-anchor="middle" font-family="Georgia,serif" font-size="86" font-weight="700" fill="none" stroke="#96382A" stroke-width="8">JG</text>
+        <text x="120" y="163" text-anchor="middle" font-family="Georgia,serif" font-size="86" font-weight="700" fill="#C97D1F">JG</text>
+      </svg>
+      <div>
+        <h1>Livro da Fazenda</h1>
+        <p>Rebanho &middot; Chocadeira &middot; Ovos &middot; JG</p>
+      </div>
+    </div>
+    <div class="today" id="todayLabel"></div>
+  </header>
+
+  <nav class="tabs" id="tabsNav">
+    <button data-tab="visao" class="active"><span class="dot" style="background:var(--ink-soft)"></span>Visão geral</button>
+    <button data-tab="rebanho"><span class="dot" style="background:var(--wool)"></span>Rebanho</button>
+    <button data-tab="sanitario"><span class="dot" style="background:var(--barn-dark)"></span>Sanitário</button>
+    <button data-tab="chocadeira"><span class="dot" style="background:var(--egg)"></span>Chocadeira</button>
+    <button data-tab="ovos"><span class="dot" style="background:var(--barn)"></span>Vendas de ovos</button>
+    <button data-tab="relatorios"><span class="dot" style="background:var(--moss-dark)"></span>Relatórios</button>
+  </nav>
+
+  <div id="loadingMsg" style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">Carregando dados salvos...</div>
+
+  <!-- VISÃO GERAL -->
+  <section class="panel active" id="panel-visao">
+    <div class="cards-row" id="overviewCards"></div>
+    <div class="board">
+      <h2>Avisos do dia</h2>
+      <p class="sub">Coisas que merecem sua atenção agora.</p>
+      <div id="alertsList"></div>
+    </div>
+  </section>
+
+  <!-- REBANHO -->
+  <section class="panel" id="panel-rebanho">
+    <div class="board">
+      <h2>Novo animal</h2>
+      <p class="sub">Cadastre um carneiro ou ovelha do rebanho.</p>
+      <form class="grid-form" id="formSheep">
+        <label><span>Brinco / ID</span><input type="text" id="sheepTag" placeholder="Ex: 014" required></label>
+        <label><span>Nome</span><input type="text" id="sheepName" placeholder="Opcional"></label>
+        <label><span>Sexo</span>
+          <select id="sheepSex"><option value="Macho">Macho</option><option value="Fêmea">Fêmea</option></select>
+        </label>
+        <label><span>Raça</span><input type="text" id="sheepBreed" placeholder="Ex: Santa Inês"></label>
+        <label><span>Nascimento</span><input type="date" id="sheepBirth"></label>
+        <label><span>Peso atual (kg)</span><input type="number" step="0.1" id="sheepWeight" placeholder="Ex: 38.5"></label>
+        <label><span>Status</span>
+          <select id="sheepStatus">
+            <option value="Saudável">Saudável</option>
+            <option value="Prenha">Prenha</option>
+            <option value="Doente">Doente</option>
+            <option value="Vendido">Vendido</option>
+          </select>
+        </label>
+        <label style="grid-column:1/-1;"><span>Observações</span><textarea id="sheepNotes" placeholder="Vacinas, tratamentos, etc."></textarea></label>
+        <button type="submit" class="action btn-wool">Adicionar ao rebanho</button>
+      </form>
+    </div>
+
+    <div class="board">
+      <h2>Registrar pesagem</h2>
+      <p class="sub">Peso de um animal já cadastrado, numa data específica.</p>
+      <form class="grid-form" id="formWeighing">
+        <label><span>Animal</span>
+          <select id="weighSheep" required></select>
+        </label>
+        <label><span>Data</span><input type="date" id="weighDate" required></label>
+        <label><span>Peso (kg)</span><input type="number" step="0.1" min="0" id="weighKg" required></label>
+        <button type="submit" class="action btn-wool">Registrar pesagem</button>
+      </form>
+    </div>
+
+    <div class="board">
+      <h2>Rebanho cadastrado</h2>
+      <p class="sub" id="sheepCountSub"></p>
+      <div id="sheepTableWrap"></div>
+    </div>
+  </section>
+
+  <!-- SANITÁRIO -->
+  <section class="panel" id="panel-sanitario">
+    <div class="board">
+      <h2>Nova aplicação</h2>
+      <p class="sub">Vacina, vermífugo ou outro tratamento aplicado a um animal.</p>
+      <form class="grid-form" id="formHealth">
+        <label><span>Animal</span>
+          <select id="healthSheep" required></select>
+        </label>
+        <label><span>Tipo</span>
+          <select id="healthType">
+            <option value="Vacina">Vacina</option>
+            <option value="Vermífugo">Vermífugo</option>
+            <option value="Outro">Outro tratamento</option>
+          </select>
+        </label>
+        <label><span>Produto</span><input type="text" id="healthProduct" placeholder="Ex: Ivermectina"></label>
+        <label><span>Data de aplicação</span><input type="date" id="healthDate" required></label>
+        <label><span>Repetir em (dias)</span><input type="number" id="healthInterval" value="90" placeholder="Ex: 90"></label>
+        <label style="grid-column:span 2;"><span>Observações</span><input type="text" id="healthNotes" placeholder="Opcional"></label>
+        <button type="submit" class="action btn-wool">Registrar aplicação</button>
+      </form>
+    </div>
+
+    <div class="board">
+      <h2>Calendário sanitário</h2>
+      <p class="sub" id="healthCountSub"></p>
+      <div id="healthTableWrap"></div>
+    </div>
+  </section>
+
+
+  <!-- CHOCADEIRA -->
+  <section class="panel" id="panel-chocadeira">
+    <div class="board">
+      <h2>Novo lote na chocadeira</h2>
+      <p class="sub">Registre um lote de ovos colocado para incubar.</p>
+      <form class="grid-form" id="formBatch">
+        <label><span>Data de início</span><input type="date" id="batchStart" required></label>
+        <label><span>Quantidade de ovos</span><input type="number" min="1" id="batchQty" required></label>
+        <label><span>Dias de incubação</span><input type="number" id="batchDays" value="21"></label>
+        <label style="grid-column:span 2;"><span>Observações</span><input type="text" id="batchNotes" placeholder="Origem dos ovos, etc."></label>
+        <button type="submit" class="action btn-egg">Iniciar lote</button>
+      </form>
+    </div>
+
+    <div class="board">
+      <h2>Lotes em andamento e concluídos</h2>
+      <p class="sub" id="batchCountSub"></p>
+      <div id="batchTableWrap"></div>
+    </div>
+  </section>
+
+  <!-- OVOS -->
+  <section class="panel" id="panel-ovos">
+    <div class="cards-row" id="eggStatCards"></div>
+
+    <div class="board">
+      <h2>Registrar coleta de ovos</h2>
+      <p class="sub">Quantidade coletada das galinhas em um dia.</p>
+      <form class="grid-form" id="formProduction">
+        <label><span>Data</span><input type="date" id="prodDate" required></label>
+        <label><span>Quantidade coletada</span><input type="number" min="1" id="prodQty" required></label>
+        <button type="submit" class="action btn-moss">Registrar coleta</button>
+      </form>
+    </div>
+
+    <div class="board">
+      <h2>Registrar venda</h2>
+      <p class="sub">Uma venda de ovos para um comprador.</p>
+      <form class="grid-form" id="formSale">
+        <label><span>Data</span><input type="date" id="saleDate" required></label>
+        <label><span>Comprador</span><input type="text" id="saleBuyer" placeholder="Nome do cliente"></label>
+        <label><span>Quantidade</span><input type="number" min="1" id="saleQty" required></label>
+        <label><span>Preço por dúzia (R$)</span><input type="number" step="0.01" min="0" id="salePrice" required></label>
+        <button type="submit" class="action btn-egg">Registrar venda</button>
+      </form>
+    </div>
+
+    <div class="board">
+      <h2>Histórico de coletas</h2>
+      <div id="productionTableWrap"></div>
+    </div>
+
+    <div class="board">
+      <h2>Histórico de vendas</h2>
+      <div id="salesTableWrap"></div>
+    </div>
+  </section>
+
+  <!-- RELATÓRIOS -->
+  <section class="panel" id="panel-relatorios">
+    <div class="board">
+      <h2>Relatório do rebanho</h2>
+      <div id="reportRebanho"></div>
+    </div>
+    <div class="board">
+      <h2>Relatório de GMD por animal</h2>
+      <p class="sub">Ganho médio diário, do primeiro ao último peso registrado de cada animal.</p>
+      <div id="reportGmd"></div>
+    </div>
+    <div class="board">
+      <h2>Relatório sanitário</h2>
+      <div id="reportSanitario"></div>
+    </div>
+    <div class="board">
+      <h2>Relatório da chocadeira</h2>
+      <div id="reportChocadeira"></div>
+    </div>
+    <div class="board">
+      <h2>Relatório de vendas de ovos</h2>
+      <div id="reportOvos"></div>
+    </div>
+    <div class="board">
+      <h2>Exportar</h2>
+      <p class="sub">Baixe um resumo completo em texto, com data de hoje, pra imprimir ou guardar.</p>
+      <button class="action btn-moss" onclick="downloadReport()">Baixar relatório completo (.txt)</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const STORAGE_KEY_SHEEP = 'rebanho:animais';
+const STORAGE_KEY_BATCHES = 'chocadeira:lotes';
+const STORAGE_KEY_EGGS = 'ovos:producao-vendas';
+const STORAGE_KEY_HEALTH = 'sanitario:eventos';
+
+let state = {
+  sheep: [],
+  batches: [],
+  eggs: { production: [], sales: [] },
+  health: []
+};
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(iso){
+  if(!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function fmtMoney(n){
+  return (n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function daysBetween(a,b){
+  return Math.round((new Date(b) - new Date(a)) / 86400000);
+}
+
+async function loadAll(){
+  try{
+    const s = await window.storage.get(STORAGE_KEY_SHEEP);
+    state.sheep = s ? JSON.parse(s.value) : [];
+  }catch(e){ state.sheep = []; }
+  try{
+    const b = await window.storage.get(STORAGE_KEY_BATCHES);
+    state.batches = b ? JSON.parse(b.value) : [];
+  }catch(e){ state.batches = []; }
+  try{
+    const eg = await window.storage.get(STORAGE_KEY_EGGS);
+    state.eggs = eg ? JSON.parse(eg.value) : { production: [], sales: [] };
+  }catch(e){ state.eggs = { production: [], sales: [] }; }
+  try{
+    const h = await window.storage.get(STORAGE_KEY_HEALTH);
+    state.health = h ? JSON.parse(h.value) : [];
+  }catch(e){ state.health = []; }
+  document.getElementById('loadingMsg').style.display = 'none';
+  renderAll();
+}
+
+async function saveSheep(){
+  try{ await window.storage.set(STORAGE_KEY_SHEEP, JSON.stringify(state.sheep)); }
+  catch(e){ console.error('Erro ao salvar rebanho', e); }
+}
+async function saveBatches(){
+  try{ await window.storage.set(STORAGE_KEY_BATCHES, JSON.stringify(state.batches)); }
+  catch(e){ console.error('Erro ao salvar lotes', e); }
+}
+async function saveEggs(){
+  try{ await window.storage.set(STORAGE_KEY_EGGS, JSON.stringify(state.eggs)); }
+  catch(e){ console.error('Erro ao salvar ovos', e); }
+}
+async function saveHealth(){
+  try{ await window.storage.set(STORAGE_KEY_HEALTH, JSON.stringify(state.health)); }
+  catch(e){ console.error('Erro ao salvar calendário sanitário', e); }
+}
+
+// TABS
+document.getElementById('tabsNav').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-tab]');
+  if(!btn) return;
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+});
+
+document.getElementById('todayLabel').textContent = 'Hoje · ' + fmtDate(todayISO());
+
+// ---------- REBANHO ----------
+document.getElementById('formSheep').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const animal = {
+    id: uid(),
+    tag: document.getElementById('sheepTag').value.trim(),
+    name: document.getElementById('sheepName').value.trim(),
+    sex: document.getElementById('sheepSex').value,
+    breed: document.getElementById('sheepBreed').value.trim(),
+    birth: document.getElementById('sheepBirth').value,
+    weight: parseFloat(document.getElementById('sheepWeight').value) || null,
+    status: document.getElementById('sheepStatus').value,
+    notes: document.getElementById('sheepNotes').value.trim(),
+    weighHistory: []
+  };
+  if(animal.weight){
+    animal.weighHistory.push({ date: todayISO(), weight: animal.weight });
+  }
+  state.sheep.unshift(animal);
+  await saveSheep();
+  e.target.reset();
+  document.getElementById('sheepSex').value = 'Macho';
+  document.getElementById('sheepStatus').value = 'Saudável';
+  renderAll();
+});
+
+function latestWeight(a){
+  if(a.weighHistory && a.weighHistory.length) return a.weighHistory[a.weighHistory.length-1].weight;
+  return a.weight || null;
+}
+function gmdRecent(a){
+  const h = a.weighHistory || [];
+  if(h.length < 2) return null;
+  const last = h[h.length-1], prev = h[h.length-2];
+  const days = daysBetween(prev.date, last.date);
+  if(days <= 0) return null;
+  return Math.round(((last.weight - prev.weight) * 1000) / days);
+}
+function gmdOverall(a){
+  const h = a.weighHistory || [];
+  if(h.length < 2) return null;
+  const first = h[0], last = h[h.length-1];
+  const days = daysBetween(first.date, last.date);
+  if(days <= 0) return null;
+  return Math.round(((last.weight - first.weight) * 1000) / days);
+}
+let expandedSheepId = null;
+window.toggleWeighHistory = function(id){
+  expandedSheepId = expandedSheepId === id ? null : id;
+  renderSheep();
+};
+window.addWeighing = async function(id){
+  const a = state.sheep.find(x=>x.id===id);
+  if(!a) return;
+  const val = prompt('Novo peso de ' + (a.name || a.tag) + ' em kg (data de hoje: ' + fmtDate(todayISO()) + '):');
+  if(val === null) return;
+  const w = parseFloat(val.replace(',','.'));
+  if(isNaN(w) || w <= 0) return;
+  if(!a.weighHistory) a.weighHistory = [];
+  a.weighHistory.push({ date: todayISO(), weight: w });
+  a.weighHistory.sort((x,y)=> new Date(x.date) - new Date(y.date));
+  a.weight = latestWeight(a);
+  await saveSheep();
+  renderAll();
+};
+window.deleteWeighing = async function(sheepId, idx){
+  const a = state.sheep.find(x=>x.id===sheepId);
+  if(!a || !a.weighHistory) return;
+  a.weighHistory.splice(idx,1);
+  a.weight = latestWeight(a);
+  await saveSheep();
+  renderAll();
+};
+
+document.getElementById('weighDate').value = todayISO();
+function populateWeighSheepSelect(){
+  const sel = document.getElementById('weighSheep');
+  const current = sel.value;
+  sel.innerHTML = state.sheep.map(a=>`<option value="${a.id}">${a.tag || '—'} ${a.name ? '· '+a.name : ''}</option>`).join('')
+    || `<option value="">Cadastre um animal primeiro</option>`;
+  if(current) sel.value = current;
+}
+document.getElementById('formWeighing').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const sheepId = document.getElementById('weighSheep').value;
+  if(!sheepId) return;
+  const a = state.sheep.find(x=>x.id===sheepId);
+  if(!a) return;
+  const date = document.getElementById('weighDate').value;
+  const w = parseFloat(document.getElementById('weighKg').value);
+  if(isNaN(w) || w <= 0) return;
+  if(!a.weighHistory) a.weighHistory = [];
+  a.weighHistory.push({ date, weight: w });
+  a.weighHistory.sort((x,y)=> new Date(x.date) - new Date(y.date));
+  a.weight = latestWeight(a);
+  await saveSheep();
+  e.target.reset();
+  document.getElementById('weighDate').value = todayISO();
+  renderAll();
+});
+
+function statusClass(status){
+  if(status === 'Saudável') return 'st-ok';
+  if(status === 'Prenha') return 'st-warn';
+  if(status === 'Doente') return 'st-danger';
+  return 'st-neutral';
+}
+
+function renderSheep(){
+  populateWeighSheepSelect();
+  const wrap = document.getElementById('sheepTableWrap');
+  document.getElementById('sheepCountSub').textContent = state.sheep.length
+    ? `${state.sheep.length} animal(is) no total.`
+    : 'Nenhum animal cadastrado ainda.';
+  if(state.sheep.length === 0){
+    wrap.innerHTML = `<div class="empty"><div class="stamp">vazio</div><br>Cadastre o primeiro animal do rebanho acima.</div>`;
+    return;
+  }
+  let rows = state.sheep.map(a => {
+    const w = latestWeight(a);
+    const gmd = gmdRecent(a);
+    const hist = a.weighHistory || [];
+    const expanded = expandedSheepId === a.id;
+    let historyRow = '';
+    if(expanded){
+      const items = hist.length ? hist.map((h,idx)=>{
+        const prev = hist[idx-1];
+        const g = prev ? Math.round(((h.weight-prev.weight)*1000)/Math.max(daysBetween(prev.date,h.date),1)) : null;
+        return `<tr>
+          <td class="mono">${fmtDate(h.date)}</td>
+          <td class="mono">${h.weight} kg</td>
+          <td class="mono">${g!==null ? g+' g/dia' : '—'}</td>
+          <td><button class="action btn-ghost small" onclick="deleteWeighing('${a.id}',${idx})">Remover</button></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="4" style="color:var(--ink-soft);font-size:12.5px;">Nenhuma pesagem registrada.</td></tr>`;
+      historyRow = `
+        <tr>
+          <td colspan="7" style="background:rgba(66,82,47,0.04);padding:14px 16px;">
+            <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">
+              Histórico de pesagens ${gmdOverall(a)!==null ? '· GMD geral: '+gmdOverall(a)+' g/dia' : ''}
+            </div>
+            <table style="margin-top:0;">
+              <thead><tr><th>Data</th><th>Peso</th><th>GMD (vs. anterior)</th><th></th></tr></thead>
+              <tbody>${items}</tbody>
+            </table>
+            <button class="action btn-ghost small" style="margin-top:10px;" onclick="addWeighing('${a.id}')">+ Nova pesagem</button>
+          </td>
+        </tr>`;
+    }
+    return `
+    <tr>
+      <td class="mono">${a.tag || '—'}</td>
+      <td>${a.name || '—'}</td>
+      <td>${a.sex}</td>
+      <td>${a.breed || '—'}</td>
+      <td class="mono">${w ? w + ' kg' : '—'}</td>
+      <td class="mono">${gmd!==null ? gmd+' g/dia' : '—'}</td>
+      <td><span class="stamp-badge ${statusClass(a.status)}">${a.status}</span></td>
+      <td class="row-actions">
+        <button class="action btn-ghost small" onclick="toggleWeighHistory('${a.id}')">${expanded?'Fechar':'Pesagens'} (${hist.length})</button>
+        <button class="action btn-ghost small" onclick="cycleSheepStatus('${a.id}')">Status</button>
+        <button class="action btn-ghost small" onclick="deleteSheep('${a.id}')">Remover</button>
+      </td>
+    </tr>${historyRow}`;
+  }).join('');
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Brinco</th><th>Nome</th><th>Sexo</th><th>Raça</th><th>Peso</th><th>GMD</th><th>Status</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+const STATUS_CYCLE = ['Saudável','Prenha','Doente','Vendido'];
+window.cycleSheepStatus = async function(id){
+  const a = state.sheep.find(x=>x.id===id);
+  if(!a) return;
+  const idx = STATUS_CYCLE.indexOf(a.status);
+  a.status = STATUS_CYCLE[(idx+1) % STATUS_CYCLE.length];
+  await saveSheep();
+  renderAll();
+};
+window.deleteSheep = async function(id){
+  state.sheep = state.sheep.filter(x=>x.id!==id);
+  await saveSheep();
+  renderAll();
+};
+
+// ---------- CHOCADEIRA ----------
+document.getElementById('batchStart').value = todayISO();
+document.getElementById('formBatch').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const batch = {
+    id: uid(),
+    start: document.getElementById('batchStart').value,
+    qty: parseInt(document.getElementById('batchQty').value) || 0,
+    days: parseInt(document.getElementById('batchDays').value) || 21,
+    notes: document.getElementById('batchNotes').value.trim(),
+    hatched: null,
+    done: false
+  };
+  state.batches.unshift(batch);
+  await saveBatches();
+  e.target.reset();
+  document.getElementById('batchStart').value = todayISO();
+  document.getElementById('batchDays').value = 21;
+  renderAll();
+});
+
+function batchDueDate(b){
+  const d = new Date(b.start);
+  d.setDate(d.getDate() + b.days);
+  return d.toISOString().slice(0,10);
+}
+function batchStatus(b){
+  if(b.done) return { text:'Concluído', cls:'st-neutral' };
+  const remaining = daysBetween(todayISO(), batchDueDate(b));
+  if(remaining < 0) return { text:'Atrasado p/ eclosão', cls:'st-danger' };
+  if(remaining === 0) return { text:'Eclosão hoje', cls:'st-warn' };
+  if(remaining <= 2) return { text:`Eclode em ${remaining}d`, cls:'st-warn' };
+  return { text:`Incubando (${remaining}d restantes)`, cls:'st-ok' };
+}
+
+function renderBatches(){
+  const wrap = document.getElementById('batchTableWrap');
+  const active = state.batches.filter(b=>!b.done).length;
+  document.getElementById('batchCountSub').textContent = state.batches.length
+    ? `${active} lote(s) ativo(s) de ${state.batches.length} no total.`
+    : 'Nenhum lote registrado ainda.';
+  if(state.batches.length === 0){
+    wrap.innerHTML = `<div class="empty"><div class="stamp">vazio</div><br>Inicie o primeiro lote de incubação acima.</div>`;
+    return;
+  }
+  let rows = state.batches.map(b=>{
+    const st = batchStatus(b);
+    const actionBtn = b.done
+      ? `<span class="mono" style="font-size:12px;color:var(--ink-soft);">${b.hatched} nasceram</span>`
+      : `<button class="action btn-ghost small" onclick="hatchBatch('${b.id}')">Registrar eclosão</button>`;
+    return `
+    <tr>
+      <td class="mono">${fmtDate(b.start)}</td>
+      <td class="mono">${b.qty}</td>
+      <td class="mono">${fmtDate(batchDueDate(b))}</td>
+      <td><span class="stamp-badge ${st.cls}">${st.text}</span></td>
+      <td>${actionBtn}</td>
+      <td class="row-actions"><button class="action btn-ghost small" onclick="deleteBatch('${b.id}')">Remover</button></td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Início</th><th>Ovos</th><th>Previsão eclosão</th><th>Situação</th><th>Resultado</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+window.hatchBatch = async function(id){
+  const b = state.batches.find(x=>x.id===id);
+  if(!b) return;
+  const val = prompt('Quantos pintos nasceram deste lote de ' + b.qty + ' ovos?');
+  if(val === null) return;
+  const n = parseInt(val);
+  if(isNaN(n) || n < 0) return;
+  b.hatched = n;
+  b.done = true;
+  await saveBatches();
+  renderAll();
+};
+window.deleteBatch = async function(id){
+  state.batches = state.batches.filter(x=>x.id!==id);
+  await saveBatches();
+  renderAll();
+};
+
+// ---------- SANITÁRIO ----------
+document.getElementById('healthDate').value = todayISO();
+
+function populateHealthSheepSelect(){
+  const sel = document.getElementById('healthSheep');
+  const current = sel.value;
+  sel.innerHTML = state.sheep.map(a=>`<option value="${a.id}">${a.tag || '—'} ${a.name ? '· '+a.name : ''}</option>`).join('')
+    || `<option value="">Cadastre um animal primeiro</option>`;
+  if(current) sel.value = current;
+}
+
+document.getElementById('formHealth').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const sheepId = document.getElementById('healthSheep').value;
+  if(!sheepId) return;
+  const date = document.getElementById('healthDate').value;
+  const interval = parseInt(document.getElementById('healthInterval').value) || null;
+  const ev = {
+    id: uid(),
+    sheepId,
+    type: document.getElementById('healthType').value,
+    product: document.getElementById('healthProduct').value.trim(),
+    date,
+    interval,
+    nextDate: interval ? addDays(date, interval) : null,
+    notes: document.getElementById('healthNotes').value.trim()
+  };
+  state.health.unshift(ev);
+  await saveHealth();
+  e.target.reset();
+  document.getElementById('healthDate').value = todayISO();
+  document.getElementById('healthInterval').value = 90;
+  renderAll();
+});
+
+function addDays(iso, days){
+  const d = new Date(iso);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0,10);
+}
+
+function healthStatus(ev){
+  if(!ev.nextDate) return { text:'Sem repetição', cls:'st-neutral' };
+  const remaining = daysBetween(todayISO(), ev.nextDate);
+  if(remaining < 0) return { text:`Atrasado ${Math.abs(remaining)}d`, cls:'st-danger' };
+  if(remaining <= 7) return { text:`Vence em ${remaining}d`, cls:'st-warn' };
+  return { text:`Em dia (${remaining}d)`, cls:'st-ok' };
+}
+
+function sheepLabel(id){
+  const a = state.sheep.find(x=>x.id===id);
+  return a ? (a.tag||'—') + (a.name ? ' · '+a.name : '') : 'Animal removido';
+}
+
+function renderHealth(){
+  populateHealthSheepSelect();
+  const wrap = document.getElementById('healthTableWrap');
+  document.getElementById('healthCountSub').textContent = state.health.length
+    ? `${state.health.length} aplicação(ões) registrada(s).`
+    : 'Nenhuma aplicação registrada ainda.';
+  if(state.health.length === 0){
+    wrap.innerHTML = `<div class="empty"><div class="stamp">vazio</div><br>Registre a primeira vacina ou vermífugo acima.</div>`;
+    return;
+  }
+  const sorted = [...state.health].sort((a,b)=> new Date(a.date) - new Date(b.date));
+  let rows = sorted.map(ev=>{
+    const st = healthStatus(ev);
+    return `
+    <tr>
+      <td>${sheepLabel(ev.sheepId)}</td>
+      <td>${ev.type}</td>
+      <td>${ev.product || '—'}</td>
+      <td class="mono">${fmtDate(ev.date)}</td>
+      <td class="mono">${ev.nextDate ? fmtDate(ev.nextDate) : '—'}</td>
+      <td><span class="stamp-badge ${st.cls}">${st.text}</span></td>
+      <td class="row-actions"><button class="action btn-ghost small" onclick="deleteHealth('${ev.id}')">Remover</button></td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Animal</th><th>Tipo</th><th>Produto</th><th>Aplicado em</th><th>Próxima dose</th><th>Situação</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+window.deleteHealth = async function(id){
+  state.health = state.health.filter(x=>x.id!==id);
+  await saveHealth();
+  renderAll();
+};
+
+// ---------- OVOS ----------
+document.getElementById('prodDate').value = todayISO();
+document.getElementById('saleDate').value = todayISO();
+
+document.getElementById('formProduction').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  state.eggs.production.unshift({
+    id: uid(),
+    date: document.getElementById('prodDate').value,
+    qty: parseInt(document.getElementById('prodQty').value) || 0
+  });
+  await saveEggs();
+  e.target.reset();
+  document.getElementById('prodDate').value = todayISO();
+  renderAll();
+});
+
+document.getElementById('formSale').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const qty = parseInt(document.getElementById('saleQty').value) || 0;
+  const pricePerDozen = parseFloat(document.getElementById('salePrice').value) || 0;
+  const total = (qty/12) * pricePerDozen;
+  state.eggs.sales.unshift({
+    id: uid(),
+    date: document.getElementById('saleDate').value,
+    buyer: document.getElementById('saleBuyer').value.trim(),
+    qty, pricePerDozen, total
+  });
+  await saveEggs();
+  e.target.reset();
+  document.getElementById('saleDate').value = todayISO();
+  renderAll();
+});
+
+function renderEggTables(){
+  const prodWrap = document.getElementById('productionTableWrap');
+  if(state.eggs.production.length === 0){
+    prodWrap.innerHTML = `<div class="empty"><div class="stamp">vazio</div><br>Registre a primeira coleta acima.</div>`;
+  }else{
+    prodWrap.innerHTML = `
+      <table><thead><tr><th>Data</th><th>Quantidade coletada</th><th></th></tr></thead>
+      <tbody>${state.eggs.production.map(p=>`
+        <tr><td class="mono">${fmtDate(p.date)}</td><td class="mono">${p.qty}</td>
+        <td><button class="action btn-ghost small" onclick="deleteProd('${p.id}')">Remover</button></td></tr>
+      `).join('')}</tbody></table>`;
+  }
+
+  const saleWrap = document.getElementById('salesTableWrap');
+  if(state.eggs.sales.length === 0){
+    saleWrap.innerHTML = `<div class="empty"><div class="stamp">vazio</div><br>Registre a primeira venda acima.</div>`;
+  }else{
+    saleWrap.innerHTML = `
+      <table><thead><tr><th>Data</th><th>Comprador</th><th>Qtd</th><th>Preço/dúzia</th><th>Total</th><th></th></tr></thead>
+      <tbody>${state.eggs.sales.map(s=>`
+        <tr><td class="mono">${fmtDate(s.date)}</td><td>${s.buyer || '—'}</td><td class="mono">${s.qty}</td>
+        <td class="mono">${fmtMoney(s.pricePerDozen)}</td><td class="mono">${fmtMoney(s.total)}</td>
+        <td><button class="action btn-ghost small" onclick="deleteSale('${s.id}')">Remover</button></td></tr>
+      `).join('')}</tbody></table>`;
+  }
+}
+window.deleteProd = async function(id){
+  state.eggs.production = state.eggs.production.filter(x=>x.id!==id);
+  await saveEggs();
+  renderAll();
+};
+window.deleteSale = async function(id){
+  state.eggs.sales = state.eggs.sales.filter(x=>x.id!==id);
+  await saveEggs();
+  renderAll();
+};
+
+// ---------- VISÃO GERAL ----------
+function totalCollected(){ return state.eggs.production.reduce((s,p)=>s+p.qty,0); }
+function totalSoldQty(){ return state.eggs.sales.reduce((s,x)=>s+x.qty,0); }
+function totalRevenue(){ return state.eggs.sales.reduce((s,x)=>s+x.total,0); }
+
+function renderOverview(){
+  const activeBatches = state.batches.filter(b=>!b.done).length;
+  const sick = state.sheep.filter(a=>a.status==='Doente').length;
+  const stock = totalCollected() - totalSoldQty();
+
+  document.getElementById('overviewCards').innerHTML = `
+    <div class="stat wool"><p class="label">Animais no rebanho</p><p class="value">${state.sheep.length}</p></div>
+    <div class="stat egg"><p class="label">Lotes na chocadeira</p><p class="value">${activeBatches}</p></div>
+    <div class="stat moss"><p class="label">Ovos em estoque</p><p class="value">${stock}</p></div>
+    <div class="stat barn"><p class="label">Receita de vendas</p><p class="value">${fmtMoney(totalRevenue())}</p></div>
+  `;
+
+  const alerts = [];
+  if(sick > 0) alerts.push(`<div class="stamp-badge st-danger" style="margin:0 8px 8px 0;">${sick} animal(is) doente(s)</div>`);
+  state.batches.forEach(b=>{
+    if(b.done) return;
+    const remaining = daysBetween(todayISO(), batchDueDate(b));
+    if(remaining <= 2) alerts.push(`<div class="stamp-badge st-warn" style="margin:0 8px 8px 0;">Lote de ${b.qty} ovos: eclosão ${remaining<0?'atrasada':(remaining===0?'hoje':'em '+remaining+'d')}</div>`);
+  });
+  if(stock < 0) alerts.push(`<div class="stamp-badge st-danger" style="margin:0 8px 8px 0;">Vendas acima do estoque coletado</div>`);
+  state.health.forEach(ev=>{
+    if(!ev.nextDate) return;
+    const remaining = daysBetween(todayISO(), ev.nextDate);
+    if(remaining <= 7) alerts.push(`<div class="stamp-badge ${remaining<0?'st-danger':'st-warn'}" style="margin:0 8px 8px 0;">${ev.type} de ${sheepLabel(ev.sheepId)} ${remaining<0?'atrasada há '+Math.abs(remaining)+'d':(remaining===0?'vence hoje':'vence em '+remaining+'d')}</div>`);
+  });
+  state.sheep.forEach(a=>{
+    if(a.status==='Vendido') return;
+    const h = a.weighHistory || [];
+    if(h.length === 0) return;
+    const lastDate = h[h.length-1].date;
+    const idleDays = daysBetween(lastDate, todayISO());
+    if(idleDays > 30) alerts.push(`<div class="stamp-badge st-warn" style="margin:0 8px 8px 0;">${a.tag||a.name||'Animal'} sem pesagem há ${idleDays}d</div>`);
+  });
+  document.getElementById('alertsList').innerHTML = alerts.length
+    ? alerts.join('')
+    : `<p style="font-size:13px;color:var(--ink-soft);margin:0;">Nada precisa da sua atenção agora.</p>`;
+}
+
+function renderEggStatCards(){
+  document.getElementById('eggStatCards').innerHTML = `
+    <div class="stat moss"><p class="label">Total coletado</p><p class="value">${totalCollected()}</p></div>
+    <div class="stat egg"><p class="label">Total vendido</p><p class="value">${totalSoldQty()}</p></div>
+    <div class="stat wool"><p class="label">Estoque disponível</p><p class="value">${totalCollected()-totalSoldQty()}</p></div>
+    <div class="stat barn"><p class="label">Receita total</p><p class="value">${fmtMoney(totalRevenue())}</p></div>
+  `;
+}
+
+function renderReports(){
+  // Rebanho
+  const total = state.sheep.length;
+  const byStatus = {};
+  STATUS_CYCLE.forEach(s => byStatus[s] = state.sheep.filter(a=>a.status===s).length);
+  const weights = state.sheep.map(latestWeight).filter(w=>w);
+  const avgWeight = weights.length ? (weights.reduce((s,w)=>s+w,0)/weights.length).toFixed(1) : null;
+  const gmds = state.sheep.map(gmdOverall).filter(g=>g!==null);
+  const avgGmd = gmds.length ? Math.round(gmds.reduce((s,g)=>s+g,0)/gmds.length) : null;
+
+  document.getElementById('reportRebanho').innerHTML = `
+    <div class="cards-row">
+      <div class="stat wool"><p class="label">Total de animais</p><p class="value">${total}</p></div>
+      <div class="stat wool"><p class="label">Peso médio atual</p><p class="value">${avgWeight ? avgWeight+' kg' : '—'}</p></div>
+      <div class="stat wool"><p class="label">GMD médio do rebanho</p><p class="value">${avgGmd!==null ? avgGmd+' g/d' : '—'}</p></div>
+    </div>
+    <p class="sub" style="margin-top:0;">Por status: ${STATUS_CYCLE.map(s=>`${s}: ${byStatus[s]}`).join(' · ')}</p>
+  `;
+
+  const gmdRows = state.sheep.map(a=>{
+    const h = a.weighHistory || [];
+    if(h.length < 2) return `<tr><td>${a.tag||'—'} ${a.name?'· '+a.name:''}</td><td colspan="5" style="color:var(--ink-soft);">Menos de 2 pesagens registradas</td></tr>`;
+    const first = h[0], last = h[h.length-1];
+    const days = daysBetween(first.date, last.date);
+    const gmd = gmdOverall(a);
+    return `<tr>
+      <td>${a.tag||'—'} ${a.name?'· '+a.name:''}</td>
+      <td class="mono">${first.weight} kg (${fmtDate(first.date)})</td>
+      <td class="mono">${last.weight} kg (${fmtDate(last.date)})</td>
+      <td class="mono">${days}d</td>
+      <td class="mono">${h.length}</td>
+      <td class="mono">${gmd!==null ? gmd+' g/dia' : '—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('reportGmd').innerHTML = state.sheep.length ? `
+    <table>
+      <thead><tr><th>Animal</th><th>Primeiro peso</th><th>Último peso</th><th>Período</th><th>Pesagens</th><th>GMD geral</th></tr></thead>
+      <tbody>${gmdRows}</tbody>
+    </table>
+  ` : `<div class="empty"><div class="stamp">vazio</div><br>Cadastre animais e pesagens pra ver o GMD aqui.</div>`;
+
+  const overdue = state.health.filter(ev=>ev.nextDate && daysBetween(todayISO(), ev.nextDate) < 0).length;
+  const dueSoon = state.health.filter(ev=>ev.nextDate && daysBetween(todayISO(), ev.nextDate) >=0 && daysBetween(todayISO(), ev.nextDate) <=7).length;
+  document.getElementById('reportSanitario').innerHTML = `
+    <div class="cards-row">
+      <div class="stat wool"><p class="label">Aplicações registradas</p><p class="value">${state.health.length}</p></div>
+      <div class="stat wool"><p class="label">Atrasadas</p><p class="value">${overdue}</p></div>
+      <div class="stat wool"><p class="label">Vencendo em 7 dias</p><p class="value">${dueSoon}</p></div>
+    </div>
+  `;
+
+  // Chocadeira
+  const totalBatches = state.batches.length;
+  const doneBatches = state.batches.filter(b=>b.done);
+  const eggsIncubated = state.batches.reduce((s,b)=>s+b.qty,0);
+  const totalHatched = doneBatches.reduce((s,b)=>s+(b.hatched||0),0);
+  const eggsInDone = doneBatches.reduce((s,b)=>s+b.qty,0);
+  const hatchRate = eggsInDone ? Math.round((totalHatched/eggsInDone)*100) : null;
+
+  document.getElementById('reportChocadeira').innerHTML = `
+    <div class="cards-row">
+      <div class="stat egg"><p class="label">Lotes totais</p><p class="value">${totalBatches}</p></div>
+      <div class="stat egg"><p class="label">Ovos incubados</p><p class="value">${eggsIncubated}</p></div>
+      <div class="stat egg"><p class="label">Pintos nascidos</p><p class="value">${totalHatched}</p></div>
+      <div class="stat egg"><p class="label">Taxa de eclosão</p><p class="value">${hatchRate!==null ? hatchRate+'%' : '—'}</p></div>
+    </div>
+  `;
+
+  // Ovos
+  const collected = totalCollected();
+  const sold = totalSoldQty();
+  const revenue = totalRevenue();
+  const avgTicket = state.eggs.sales.length ? fmtMoney(revenue/state.eggs.sales.length) : '—';
+
+  document.getElementById('reportOvos').innerHTML = `
+    <div class="cards-row">
+      <div class="stat barn"><p class="label">Total coletado</p><p class="value">${collected}</p></div>
+      <div class="stat barn"><p class="label">Total vendido</p><p class="value">${sold}</p></div>
+      <div class="stat barn"><p class="label">Estoque disponível</p><p class="value">${collected-sold}</p></div>
+      <div class="stat barn"><p class="label">Receita total</p><p class="value">${fmtMoney(revenue)}</p></div>
+    </div>
+    <p class="sub" style="margin-top:0;">Ticket médio por venda: ${avgTicket}</p>
+  `;
+}
+
+window.downloadReport = function(){
+  const total = state.sheep.length;
+  const byStatus = {};
+  STATUS_CYCLE.forEach(s => byStatus[s] = state.sheep.filter(a=>a.status===s).length);
+  const weights = state.sheep.map(latestWeight).filter(w=>w);
+  const avgWeight = weights.length ? (weights.reduce((s,w)=>s+w,0)/weights.length).toFixed(1) : '—';
+  const gmds = state.sheep.map(gmdOverall).filter(g=>g!==null);
+  const avgGmd = gmds.length ? Math.round(gmds.reduce((s,g)=>s+g,0)/gmds.length) : '—';
+  const doneBatches = state.batches.filter(b=>b.done);
+  const totalHatched = doneBatches.reduce((s,b)=>s+(b.hatched||0),0);
+  const eggsInDone = doneBatches.reduce((s,b)=>s+b.qty,0);
+  const hatchRate = eggsInDone ? Math.round((totalHatched/eggsInDone)*100) : '—';
+
+  const lines = [];
+  lines.push('LIVRO DA FAZENDA — RELATÓRIO GERAL');
+  lines.push('Gerado em: ' + fmtDate(todayISO()));
+  lines.push('');
+  lines.push('--- REBANHO ---');
+  lines.push('Total de animais: ' + total);
+  STATUS_CYCLE.forEach(s => lines.push('  ' + s + ': ' + byStatus[s]));
+  lines.push('Peso médio atual: ' + avgWeight + (avgWeight!=='—' ? ' kg' : ''));
+  lines.push('GMD médio do rebanho: ' + avgGmd + (avgGmd!=='—' ? ' g/dia' : ''));
+  lines.push('');
+  state.sheep.forEach(a=>{
+    lines.push('  Brinco ' + (a.tag||'—') + ' | ' + (a.name||'sem nome') + ' | ' + a.sex + ' | ' + a.status + ' | peso atual: ' + (latestWeight(a)||'—') + ' kg' + (gmdOverall(a)!==null ? ' | GMD: '+gmdOverall(a)+' g/dia' : ''));
+  });
+  lines.push('');
+  lines.push('--- GMD DETALHADO POR ANIMAL ---');
+  state.sheep.forEach(a=>{
+    const h = a.weighHistory || [];
+    if(h.length < 2){
+      lines.push('  ' + (a.tag||'—') + (a.name?' · '+a.name:'') + ': menos de 2 pesagens');
+      return;
+    }
+    const first = h[0], last = h[h.length-1];
+    const days = daysBetween(first.date, last.date);
+    lines.push('  ' + (a.tag||'—') + (a.name?' · '+a.name:'') + ': ' + first.weight + 'kg (' + fmtDate(first.date) + ') → ' + last.weight + 'kg (' + fmtDate(last.date) + ') em ' + days + 'd = ' + gmdOverall(a) + ' g/dia');
+  });
+  lines.push('');
+  lines.push('--- CALENDÁRIO SANITÁRIO ---');
+  lines.push('Aplicações registradas: ' + state.health.length);
+  const overdueList = state.health.filter(ev=>ev.nextDate && daysBetween(todayISO(), ev.nextDate) < 0);
+  lines.push('Atrasadas: ' + overdueList.length);
+  [...state.health].sort((a,b)=> new Date(a.date)-new Date(b.date)).forEach(ev=>{
+    lines.push('  ' + sheepLabel(ev.sheepId) + ' | ' + ev.type + (ev.product ? ' ('+ev.product+')' : '') + ' | aplicado: ' + fmtDate(ev.date) + (ev.nextDate ? ' | próxima: '+fmtDate(ev.nextDate) : ''));
+  });
+  lines.push('');
+  lines.push('--- CHOCADEIRA ---');
+  lines.push('Lotes totais: ' + state.batches.length);
+  lines.push('Ovos incubados: ' + state.batches.reduce((s,b)=>s+b.qty,0));
+  lines.push('Pintos nascidos: ' + totalHatched);
+  lines.push('Taxa de eclosão (lotes concluídos): ' + hatchRate + (hatchRate!=='—' ? '%' : ''));
+  lines.push('');
+  lines.push('--- VENDA DE OVOS ---');
+  lines.push('Total coletado: ' + totalCollected());
+  lines.push('Total vendido: ' + totalSoldQty());
+  lines.push('Estoque disponível: ' + (totalCollected()-totalSoldQty()));
+  lines.push('Receita total: ' + fmtMoney(totalRevenue()));
+  lines.push('');
+  lines.push('Livro da Fazenda · JG');
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'relatorio-fazenda-' + todayISO() + '.txt';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+function renderAll(){
+  renderOverview();
+  renderSheep();
+  renderHealth();
+  renderBatches();
+  renderEggStatCards();
+  renderEggTables();
+  renderReports();
+}
+
+loadAll();
+</script>
+</body>
+</html>
